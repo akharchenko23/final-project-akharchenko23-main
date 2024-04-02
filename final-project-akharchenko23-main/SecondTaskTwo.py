@@ -1,20 +1,17 @@
-import seaborn as sns
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
-netflix_df = pd.read_csv("netflix_dataset.csv")
+# Load the Netflix dataset
+netflix_data = pd.read_csv('netflix_dataset.csv')
+new_content_by_year = netflix_data.groupby('release_year').size()
 
-
-# Group the dataset by release year and count the number of content releases for each year
-content_by_year = netflix_df['release_year'].value_counts().sort_index()
-
-# Plot the trend of content production over the years
+# Plot trend of new content releases over time
 plt.figure(figsize=(12, 6))
-sns.lineplot(x=content_by_year.index, y=content_by_year.values, marker='o', color='skyblue')
-plt.title('Trend of Content Production Over the Years')
+new_content_by_year.plot(kind='line', marker='o', color='b')
+plt.title('Trend of New Content Releases on Netflix Over Time')
 plt.xlabel('Release Year')
-plt.ylabel('Count of New Content')
-plt.xticks(rotation=45)
+plt.ylabel('Number of New Releases')
 plt.grid(True)
+plt.tight_layout()
 plt.show()
-
