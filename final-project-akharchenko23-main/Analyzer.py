@@ -1,45 +1,57 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
-# Load the dataset
-netflix_df = pd.read_csv("netflix_dataset.csv")
-# Display the first few rows of the dataset
-print(netflix_df.head())
+# Load the Netflix dataset
+netflix_data = pd.read_csv('netflix_dataset.csv')
 
-# Check the data types of each column
-print(netflix_df.dtypes)
+# Filtering movies and TV shows
+movies = netflix_data[netflix_data['type'] == 'Movie']
+tv_shows = netflix_data[netflix_data['type'] == 'TV Show']
 
-# Check for missing values
-print(netflix_df.isnull().sum())
+# Grouping by release year for movies and TV shows
+movies_by_year = movies['release_year'].value_counts().sort_index()
+tv_shows_by_year = tv_shows['release_year'].value_counts().sort_index()
 
+# Aligning years for TV shows
+merged_index = movies_by_year.index.union(tv_shows_by_year.index)
+movies_by_year = movies_by_year.reindex(merged_index, fill_value=0)
+tv_shows_by_year = tv_shows_by_year.reindex(merged_index, fill_value=0)
 
-# Count the number of movies and TV shows
-content_type_counts = netflix_df['type'].value_counts()
+# Determining the width of the bars
+bar_width = 0.35
 
-# Plot the distribution
-plt.figure(figsize=(8, 6))
-content_type_counts.plot(kind='bar', color=['skyblue', 'yellow'])
-plt.title('Distribution of Movies vs TV Shows')
-plt.xlabel('Content Type')
-plt.ylabel('Count')
-plt.xticks(rotation=0)
-plt.show()
+# Creating numerical indices for years
+years = np.arange(len(merged_index))
 
-import seaborn as sns
+# Print key details
+print("Total number of movies:", movies.shape[0])
+print("Total number of TV shows:", tv_shows.shape[0])
+print()
 
-# Convert date_added column to datetime
-netflix_df['date_added'] = pd.to_datetime(netflix_df['date_added'])
+# Print distribution of movies and TV shows among years
+print("Distribution of movies among years:")
+print(movies_by_year)
+print()
 
-# Extract year from date_added
-netflix_df['year_added'] = netflix_df['date_added'].dt.year
+print("Distribution of TV shows among years:")
+print(tv_shows_by_year)
+print()
 
-# Plot the trend of content added over the years
-plt.figure(figsize=(10, 6))
-sns.countplot(x='year_added', hue='type', data=netflix_df)
-plt.title('Trend of Content Added Over the Years')
-plt.xlabel('Year')
-plt.ylabel('Count')
+# Creating the plot
+plt.figure(figsize=(25, 6))
+
+# Adding bars for movies
+plt.bar(years - bar_width/2, movies_by_year, bar_width, color='b', label='Movies')
+
+# Adding bars for TV shows
+plt.bar(years + bar_width/2, tv_shows_by_year, bar_width, color='r', label='TV Shows', alpha=0.7)
+
+plt.title('Amount of Netflix Content by Release Year')
+plt.xlabel('Release Year')
+plt.ylabel('Number of Titles')
+plt.xticks(years, merged_index)  # Setting x-axis labels for years
 plt.xticks(rotation=45)
-plt.legend(title='Content Type')
+plt.legend()  # Adding legend
+plt.tight_layout()
 plt.show()
-
